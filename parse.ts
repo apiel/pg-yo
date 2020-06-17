@@ -1,3 +1,5 @@
+import { main, Runner } from './consumer.ts';
+
 export function run(file: string) {
     console.log('open file', file);
     console.log('parse file');
@@ -9,6 +11,5 @@ export function run(file: string) {
 }
 
 if (import.meta.main) {
-    const [file] = process.args();
-    run(file);
+    main(Runner.parse, run);
 }
