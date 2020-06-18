@@ -2,6 +2,17 @@
 import { writeFileSync, readdirSync, readFileSync, unlinkSync } from "fs";
 import { join } from "path";
 
+export interface Data {
+  name: string,
+  url: string,
+  html?: string,
+}
+
+export interface Item {
+  file: string,
+  data: Data,
+}
+
 export enum Runner {
   crawl = "crawl",
   parse = "parse",
@@ -9,7 +20,7 @@ export enum Runner {
   urls = "urls",
 }
 
-export function push(type: Runner, data: any) {
+export function push(type: Runner, data: Data) {
   writeFileSync(join(__dirname, "data", type, data.name), JSON.stringify(data));
 }
 
@@ -25,10 +36,10 @@ function pick(type: Runner) {
   }
 }
 
-export function consume(type: Runner, run: (item: any) => void) {
+export async function consume(type: Runner, run: (item: Item) => void | Promise<void>) {
   const item = pick(type);
   if (item) {
-    run(item);
+    await run(item);
     unlinkSync(item.file);
     consume(type, run);
   } else {

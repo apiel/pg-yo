@@ -1,15 +1,25 @@
-import { main, Runner } from './consumer.ts';
+import { push, Runner, Item } from "./consumer";
+import { JSDOM } from "jsdom";
+import { namifyUrl } from "./utils/slugify";
+import { fixUrl } from "./utils/fixurl";
 
-export function run(file: string) {
-    console.log('open file', file);
-    console.log('parse file');
-    console.log('extract price');
-    console.log('send to next step: save');
-    console.log('extract urls');
-    console.log('send next step: urls');
-    console.log('remove file');
+export function runParser({ data }: Item) {
+  console.log("parse", data.url);
+
+  const dom = new JSDOM(data.html);
+  const links = dom.window.document.links;
+  for (var i = 0; i < links.length; i++) {
+    const url = fixUrl(links[i].href);
+    // actually this should be the job of handleURL but for testing i hack :p
+    if (url.startsWith("http") && !url.startsWith("https://www.fressnapf.at/c/")) {
+    //   console.log("url:", url);
+      push(Runner.urls, {
+        url,
+        name: namifyUrl(url),
+      });
+    }
+  }
 }
 
-if (import.meta.main) {
-    main(Runner.parse, run);
-}
+// const html = readFileSync("./file.html").toString();
+// runParser({ data: { html } });
